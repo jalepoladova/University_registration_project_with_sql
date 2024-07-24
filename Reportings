@@ -1,0 +1,56 @@
+--to see the name, date of birth, and email of all students:
+CREATE VIEW students_view AS 
+SELECT STUDENT_NAME,DOB,EMAIL 
+FROM STUDENTS;
+
+SELECT * FROM students_view;
+
+
+
+
+-- the name of the 10 highest-scoring students:
+CREATE VIEW students_grade_view AS
+SELECT ST.STUDENT_ID,ST.STUDENT_NAME,GRD.GRADE FROM STUDENTS ST
+LEFT JOIN GRADES GRD ON ST.STUDENT_ID=GRD.STUDENT_ID
+ORDER BY GRADE DESC
+FETCH FIRST 10 ROWS ONLY;
+
+SELECT * FROM students_grade_view;
+
+
+
+--to see the names of the students enrolled in the mysql course:
+CREATE VIEW student_course_view AS
+SELECT ST.STUDENT_ID,ST.STUDENT_NAME,E.COURSE_ID,C.COURSE_NAME FROM STUDENTS ST
+JOIN ENROLLMENT E ON  ST.STUDENT_ID=E.STUDENT_ID
+JOIN COURSES C ON E.COURSE_ID=C.COURSE_ID
+WHERE C.COURSE_NAME='MySQL';
+
+SELECT * FROM student_course_view;
+
+
+--To see the names of the students who participated in the exam on june 11:
+CREATE VIEW students_exam_view AS
+SELECT ST.STUDENT_NAME, E.EXAM_DATE, GRD.GRADE
+FROM STUDENTS ST
+JOIN GRADES GRD ON ST.STUDENT_ID = GRD.STUDENT_ID
+JOIN EXAMS E ON GRD.EXAM_ID = E.EXAM_ID
+WHERE E.EXAM_DATE = '11-JUN-2023';
+
+
+SELECT * FROM students_exam_view;
+
+
+
+
+--to give rank to students:
+CREATE VIEW students_grade_rank_view AS
+SELECT s.STUDENT_NAME, c.COURSE_NAME, e.EXAM_DATE, g.GRADE,
+RANK() OVER(PARTITION BY e.COURSE_ID ORDER BY g.GRADE DESC) AS GRADE_RANK
+FROM STUDENTS s
+JOIN GRADES g ON s.STUDENT_ID = g.STUDENT_ID
+JOIN EXAMS e ON g.EXAM_ID = e.EXAM_ID
+JOIN COURSES c ON e.COURSE_ID = c.COURSE_ID
+ORDER BY e.COURSE_ID, g.GRADE DESC;
+
+SELECT * FROM students_grade_rank_view;
