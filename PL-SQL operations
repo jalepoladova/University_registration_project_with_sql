@@ -1,0 +1,243 @@
+--PL/SQL PACKAGES:
+CREATE OR REPLACE PACKAGE university_package AS
+    -- Procedure for adding students
+    PROCEDURE add_student(
+        p_name students.student_name%type,
+        p_dob students.dob%type,
+        p_gender students.gender%type,
+        p_email students.email%type,
+        p_password students.password%type
+    );
+
+    -- Procedure for updating students
+    PROCEDURE update_student(
+        p_student_id students.student_id%type,
+        p_name students.student_name%type,
+        p_dob students.dob%type,
+        p_gender students.gender%type,
+        p_email students.email%type,
+        p_password students.password%type
+    );
+
+    -- Procedure for deleting students
+    PROCEDURE delete_student(
+        p_student_id students.student_id%type
+
+    );
+    -- Procedure for adding course
+    PROCEDURE add_course(
+        p_course_name courses.course_name%type,
+        p_department courses.department%type
+    );
+
+    -- Procedure for updating course
+    PROCEDURE update_course(
+        p_course_id courses.course_id%type,
+        p_course_name courses.course_name%type,
+        p_department courses.department%type
+    );
+
+    -- Procedure for deleting course
+    PROCEDURE delete_course(
+        p_course_id courses.course_id%type
+    );
+
+    -- Procedure for create enrollment
+    PROCEDURE create_enrollment(
+        p_student_id enrollment.student_id%type,
+        p_course_id enrollment.course_id%type
+    );
+
+    -- Procedure for adding exams
+    PROCEDURE add_exam(
+        p_course_id exams.course_id%type,
+        p_exam_date exams.exam_date%type
+    );
+
+    -- Procedure for adding grades
+    PROCEDURE add_grade(
+        p_student_id grades.student_id%type,
+        p_exam_id grades.exam_id%type,
+        p_grade grades.grade%type
+    );
+END university_package;
+/
+
+
+-- PL/SQL packages body 
+CREATE OR REPLACE PACKAGE BODY university_package AS
+    PROCEDURE add_student(
+        p_name students.student_name%type,
+        p_dob students.dob%type,
+        p_gender students.gender%type,
+        p_email students.email%type,
+        p_password students.password%type
+    ) IS
+    BEGIN
+        INSERT INTO students(student_id,student_name, dob, gender, email, password)
+        VALUES(student_id_seq.nextval,p_name, p_dob, p_gender, p_email, p_password);
+        COMMIT;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+          DBMS_OUTPUT.PUT_LINE('Error: Data not found.');
+          add_log(sqlerrm);
+        WHEN OTHERS THEN
+          DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+          ROLLBACK;
+    END add_student;
+
+    PROCEDURE update_student(
+        p_student_id students.student_id%type,
+        p_name students.student_name%type,
+        p_dob students.dob%type,
+        p_gender students.gender%type,
+        p_email students.email%type,
+        p_password students.password%type
+    ) IS
+    BEGIN
+        UPDATE students
+        SET
+            student_name = p_name,
+            dob = p_dob,
+            gender = p_gender,
+            email = p_email,
+            password = p_password
+        WHERE
+            student_id = p_student_id;
+            COMMIT;
+    END update_student;
+
+    PROCEDURE delete_student(
+        p_student_id students.student_id%type
+    ) IS
+    BEGIN
+        DELETE FROM students
+        WHERE
+            student_id = p_student_id;
+        COMMIT;
+    END delete_student;
+    
+    
+    PROCEDURE add_course(
+        p_course_name courses.course_name%type,
+        p_department courses.department%type
+    ) IS
+    BEGIN
+        INSERT INTO courses(course_id, course_name, department)
+        VALUES (course_id_seq.nextval, p_course_name, p_department);
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+            add_log(sqlerrm);
+            ROLLBACK;
+    END add_course;
+
+    PROCEDURE update_course(
+        p_course_id courses.course_id%type,
+        p_course_name courses.course_name%type,
+        p_department courses.department%type
+    ) IS
+    BEGIN
+        UPDATE courses
+        SET
+            course_name = p_course_name,
+            department = p_department
+        WHERE
+            course_id = p_course_id;
+        COMMIT;
+
+    END update_course;
+
+    PROCEDURE delete_course(
+        p_course_id courses.course_id%type
+    ) IS
+    BEGIN
+        DELETE FROM courses
+        WHERE
+            course_id = p_course_id;
+        COMMIT;
+    END delete_course;
+    
+    PROCEDURE create_enrollment(
+        p_student_id enrollment.student_id%type,
+        p_course_id enrollment.course_id%type
+    ) IS
+
+    BEGIN
+        INSERT INTO enrollment(enrollment_id, student_id,course_id)
+        VALUES (enrollment_id_seq.nextval, p_student_id, p_course_id);
+        COMMIT;
+        
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+            add_log(sqlerrm);
+            ROLLBACK;
+    END create_enrollment;
+    
+    
+    PROCEDURE add_exam(
+        p_course_id exams.course_id%type,
+        p_exam_date exams.exam_date%type
+    ) IS
+    BEGIN
+        INSERT INTO exams(exam_id, course_id, exam_date)
+        VALUES (exam_id_seq.nextval, p_course_id, p_exam_date);
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+            add_log(sqlerrm);
+            ROLLBACK;
+    END add_exam;
+
+    PROCEDURE add_grade(
+        p_student_id grades.student_id%type,
+        p_exam_id grades.exam_id%type,
+        p_grade grades.grade%type
+    ) IS
+   
+    BEGIN
+        INSERT INTO grades(grade_id, student_id, exam_id, grade)
+        VALUES (grade_id_seq.nextval, p_student_id, p_exam_id, p_grade);
+        COMMIT;
+        
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+            add_log(sqlerrm);
+            ROLLBACK;
+    END add_grade;
+
+END university_package;
+/
+
+
+
+
+-- Log table
+CREATE TABLE LOGS (
+    LOG_ID INT PRIMARY KEY,
+    LOG_TIMESTAMP TIMESTAMP,
+    LOG_MESSAGE VARCHAR2(100)
+);
+
+-- create sequence
+CREATE SEQUENCE LOG_ID_SEQ
+    START WITH 1
+    INCREMENT BY 1
+    MAXVALUE 999999999 
+    NOCYCLE;
+
+CREATE OR REPLACE PROCEDURE ADD_LOG(
+    p_log_message VARCHAR2
+) IS
+pragma autonomous_transaction;
+BEGIN
+    -- add log record
+    INSERT INTO LOGS (LOG_ID, LOG_TIMESTAMP, LOG_MESSAGE)
+    VALUES (LOG_ID_SEQ.NEXTVAL, SYSTIMESTAMP,  p_log_message);
+    commit;
+END ADD_LOG;
+/
